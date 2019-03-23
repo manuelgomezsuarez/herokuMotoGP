@@ -1,1 +1,1 @@
-web: gunicorn apiMotoGP.wsgi
+web: gunicorn apiMotoGP.wsgi --log-file -
