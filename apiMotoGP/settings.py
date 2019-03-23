@@ -136,7 +136,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 STATIC_URL = '/static/'
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    ("js", os.path.join(STATIC_ROOT,'js')),
+    ("css", os.path.join(STATIC_ROOT,'css')),
+    ("images", os.path.join(STATIC_ROOT,'images')),
+    ("fonts", os.path.join(STATIC_ROOT,'fonts')),
 )
 # Extra places for collectstatic to find static files.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
