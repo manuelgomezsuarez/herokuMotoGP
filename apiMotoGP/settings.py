@@ -30,8 +30,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
-	'django.contrib.staticfiles',
+INSTALLED_APPS = [	
     'app',
     # Add your apps here to enable them
     'django.contrib.admin',
@@ -40,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'rest_framework',
-	'django.contrib.staticfiles',
     'django_filters',
+	'django.contrib.staticfiles',
 ]
 
 REST_FRAMEWORK = {
