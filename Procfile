@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --noinput;gunicorn apiMotoGP.wsgi --log-file -
+web: python manage.py collectstatic --noinput;--log-file -
