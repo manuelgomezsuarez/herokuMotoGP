@@ -1,5 +1,5 @@
 from rest_framework_mongoengine import serializers
-from app.models import Carreras, Campeonatos, Documentacion
+from app.models import Carreras, Campeonatos, Documentacion, Piloto
  
 
     
@@ -15,4 +15,9 @@ class PosicionCampeonatoSerializer(serializers.DocumentSerializer):
 class PosicionDocumentacionSerializer(serializers.DocumentSerializer):
     class Meta:
         model = Documentacion
+        exclude=['id',]
+
+class PilotoSerializer(serializers.DocumentSerializer):
+    class Meta:
+        model = Piloto
         exclude=['id',]

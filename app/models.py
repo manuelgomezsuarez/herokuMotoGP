@@ -22,7 +22,6 @@ class Carreras(Document):
     diferencia = fields.StringField(required=False)
 
 
-
 class Campeonatos(Document):
     id=fields.ObjectId
     temporada = fields.IntField(required=False)
@@ -42,3 +41,13 @@ class Documentacion(Document):
     lugar = fields.StringField(required=False)
     fecha = fields.StringField(required=False)
     documentacion = fields.ListField()
+
+class Piloto(Document):
+    #id=fields.ObjectId
+    nombre = fields.StringField(required=False)
+    pais = fields.StringField(required=False)
+    infoPiloto=fields.URLField(required=False) #Wikipedia
+    fotoPiloto=fields.URLField(required=False) #Wikipedia
+    numCampeonatosGanados=fields.StringField(required=False)
+    datosAnuales=fields.ListField(required=False) #Año, V Media, Moto Usada, Posicion Campeonato, Carreras Ganadas
+
