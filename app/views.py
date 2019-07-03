@@ -489,7 +489,7 @@ class PilotoViewSet(meviewsets.ModelViewSet):
                 #print(t.get("podios"))
                 #print(t.get("vMedia"))
                 #campeonato_t=querysetCampeonato.filter(piloto=p.nombre,temporada=t.get("_id").get("temporada")).only('pos').first()
-                p.datosAnuales.append({t.get("_id").get("temporada"):{
+                p.datos_anuales.append({t.get("_id").get("temporada"):{
                     "categoria":t.get("_id").get("categoria"),
                     "moto":t.get("_id").get("moto"),
                     "num_victorias":t.get("victorias"),
