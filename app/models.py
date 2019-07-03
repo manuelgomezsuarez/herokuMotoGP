@@ -46,9 +46,9 @@ class Piloto(Document):
     #id=fields.ObjectId
     nombre = fields.StringField(required=False)
     pais = fields.StringField(required=False)
-    infoPiloto=fields.URLField(required=False) #Wikipedia
-    fotoPiloto=fields.URLField(required=False) #Wikipedia
-    numCampeonatosGanados=fields.StringField(required=False)
+    wiki_piloto=fields.URLField(required=False) #Wikipedia
+    foto_piloto=fields.URLField(required=False) #Wikipedia
+    num_campeonatos_ganados=fields.StringField(required=False)
     datosAnuales=fields.ListField(required=False) #Año, V Media, Moto Usada, Posicion Campeonato, Carreras Ganadas
 
 class PilotoRedirect(Document):

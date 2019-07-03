@@ -401,13 +401,13 @@ class PilotoViewSet(meviewsets.ModelViewSet):
             testPiloto= Piloto()
             testPiloto.nombre=query.piloto
             testPiloto.pais=query.pais
-            testPiloto.infoPiloto=infoPiloto
-            testPiloto.fotoPiloto=fotoPiloto
+            testPiloto.wiki_piloto=infoPiloto
+            testPiloto.foto_piloto=fotoPiloto
             pilotos=[testPiloto]
             p=testPiloto
             queryPiloto=querysetCampeonato.filter(piloto=p.nombre).order_by('temporada').only('pos','temporada','moto','categoria')
             numCampeonatosGanados=querysetCampeonato.filter(piloto=p.nombre,pos=1).count()
-            p.numCampeonatosGanados=int(numCampeonatosGanados) or 0;
+            p.num_campeonatos_ganados=int(numCampeonatosGanados) or 0;
             cont=0
             infoPiloto=Carreras._get_collection().aggregate([
                     
@@ -495,7 +495,7 @@ class PilotoViewSet(meviewsets.ModelViewSet):
                     "num_victorias":t.get("victorias"),
                     "num_podios":t.get("podios"),
                     "posicion_campeonato":posicion,
-                    "velMedia":t.get("vMedia"),
+                    "vel_media":t.get("vMedia"),
 
                     }})
         
