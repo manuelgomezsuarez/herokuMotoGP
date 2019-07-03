@@ -550,7 +550,7 @@ class PilotoRedirectViewSet(meviewsets.ModelViewSet):
         for p in query:
             pil=PilotoRedirect()
             pil.nombre=p
-            pil.info=self.request.get_full_path().split("/piloto")[0]+"/piloto/info/?piloto="+p
+            pil.info="https://motogp-api.herokuapp.com/piloto/info/?piloto="+p.replace(" ","%20")
             queryset.append(pil)
 
         return queryset
