@@ -10,6 +10,6 @@ schema_view = get_swagger_view(title='MotoGP API')
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'', include('app.urls')),
-    url(r'^api/', schema_view),
+    url(r'^docs/', schema_view),
 
 ]
