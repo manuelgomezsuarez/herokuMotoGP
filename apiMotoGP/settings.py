@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'rest_framework',
     'django_filters',
+    'rest_framework_swagger',
 	'django.contrib.staticfiles',
 ]
 
@@ -47,6 +48,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH':False,
+    'SUPPORTED_SUBMIT_METHODS': ['get'],
+ 
 }
 
 

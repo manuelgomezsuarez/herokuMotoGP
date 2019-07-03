@@ -51,3 +51,6 @@ class Piloto(Document):
     numCampeonatosGanados=fields.StringField(required=False)
     datosAnuales=fields.ListField(required=False) #Año, V Media, Moto Usada, Posicion Campeonato, Carreras Ganadas
 
+class PilotoRedirect(Document):
+    nombre=fields.StringField(required=False)
+    info=fields.StringField(required=False)
