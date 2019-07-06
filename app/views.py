@@ -426,6 +426,13 @@ class PilotoViewSet(meviewsets.ModelViewSet):
             "victorias": {  
                 "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
             },
+            "segundo": {  
+                "$cond": [ { "$eq": ["$pos", 2 ] }, 1, 0]
+            },
+
+            "tercero": {  
+                "$cond": [ { "$eq": ["$pos", 3 ] }, 1, 0]
+            },
             "podios": {  
                 "$cond": [ { "$in": [ "$pos", [1,2,3] ] }, 1, 0]
             }
@@ -435,6 +442,8 @@ class PilotoViewSet(meviewsets.ModelViewSet):
         "$group": {
             "_id": {"temporada":"$temporada","moto":"$moto","categoria":"$categoria","equipo":"$equipo"},
             "victorias": { "$sum": "$victorias" },
+            "segundo": { "$sum": "$segundo" },
+            "tercero": { "$sum": "$tercero" },
             "podios": { "$sum": "$podios" },
             "vMedia":{"$avg":"$kmh"},
             "sumPuntos":{"$sum":"$puntos"}
@@ -496,6 +505,8 @@ class PilotoViewSet(meviewsets.ModelViewSet):
                     "categoria":t.get("_id").get("categoria"),
                     "moto":t.get("_id").get("moto"),
                     "num_victorias":t.get("victorias"),
+                    "num_segundo":t.get("segundo"),
+                    "num_tercero":t.get("tercero"),
                     "num_podios":t.get("podios"),
                     "posicion_campeonato":posicion,
                     "vel_media":t.get("vMedia"),
