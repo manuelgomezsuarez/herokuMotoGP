@@ -422,6 +422,7 @@ class PilotoViewSet(meviewsets.ModelViewSet):
             "categoria": "$categoria",
             "moto": "$moto",
             "equipo": "$equipo",
+            "puntos":"$puntos",
             "victorias": {  
                 "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
             },
@@ -432,10 +433,11 @@ class PilotoViewSet(meviewsets.ModelViewSet):
     },
     {
         "$group": {
-            "_id": {"temporada":"$temporada","moto":"$moto","categoria":"$categoria"},
+            "_id": {"temporada":"$temporada","moto":"$moto","categoria":"$categoria","equipo":"$equipo"},
             "victorias": { "$sum": "$victorias" },
             "podios": { "$sum": "$podios" },
-            "vMedia":{"$avg":"$kmh"}
+            "vMedia":{"$avg":"$kmh"},
+            "sumPuntos":{"$sum":"$puntos"}
         }
     },
     {"$sort":{"_id.temporada":1}}
@@ -497,6 +499,7 @@ class PilotoViewSet(meviewsets.ModelViewSet):
                     "num_podios":t.get("podios"),
                     "posicion_campeonato":posicion,
                     "vel_media":t.get("vMedia"),
+                    "url_campeonato":"https://motogp-api.herokuapp.com/campeonato/?temporada="+str(t.get("_id").get("temporada"))+"&categoria="+t.get("_id").get("categoria")
 
                     }})
         
@@ -780,6 +783,7 @@ class DashboardViewSet(meviewsets.ModelViewSet):
         {
             "$project": {
                 "temporada":"$temporada",
+                "categoria":"$categoria",
                 "piloto":"$piloto",
                 "victorias":{  
                 "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
@@ -788,7 +792,7 @@ class DashboardViewSet(meviewsets.ModelViewSet):
         },
         {
             "$group": {
-                "_id": {"piloto":"$piloto",},
+                "_id": {"piloto":"$piloto","categoria":"$categoria"},
                 "victorias":{"$sum":"$victorias"},
             }
         },
@@ -798,7 +802,7 @@ class DashboardViewSet(meviewsets.ModelViewSet):
     ])
         topPilotosTemporada=[]
         for r in recordVictoriasPilotoTemporada:
-            topPilotosTemporada.append({r.get("_id").get("piloto"):r.get("victorias")})
+            topPilotosTemporada.append({r.get("_id").get("piloto")+" - "+r.get("_id").get("categoria"):r.get("victorias")})
         dashboard.datos_ultima_temporada.append({"top3_victorias":topPilotosTemporada})
         for r in recordMotosVictoriosasTemporada:
             topMotosTemporada.append({r.get("_id").get("moto"):r.get("victorias")})
