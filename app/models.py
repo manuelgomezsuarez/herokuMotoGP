@@ -54,3 +54,21 @@ class Piloto(Document):
 class PilotoRedirect(Document):
     nombre=fields.StringField(required=False)
     info=fields.StringField(required=False)
+
+class Dashboard(Document):
+    #id=fields.ObjectId
+    #piloto_record_puntos_campeonato= fields.StringField(required=False)
+    #piloto_mas_temporadas_corriendo= fields.StringField(required=False)
+    #piloto_mas_puntos_historia= fields.StringField(required=False)
+    #piloto_velocidad_media_mayor_carrera = fields.StringField(required=False)
+    #nacionalidad_historica_pilotos=fields.ListField(required=False) 
+    #moto_mas_victoriosa=fields.StringField(required=False)
+    #ultima_carrera_disputada=fields.StringField(required=False)
+    #resumen_ultima_carrera_disputada=fields.ListField(required=False)
+
+    #####OtraAlternativa#####
+    datos_historicos=fields.ListField(required=False)
+    datos_ultima_temporada=fields.ListField(required=False)
+
+
+

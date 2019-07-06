@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework_mongoengine import viewsets as meviewsets
-from apiMotoGP.serializers import PosicionCarreraSerializer, PosicionCampeonatoSerializer,PosicionDocumentacionSerializer,PilotoSerializer,PilotoRedirectSerializer
-from app.models import  Carreras, Campeonatos,Documentacion,Piloto,PilotoRedirect
+from apiMotoGP.serializers import PosicionCarreraSerializer, PosicionCampeonatoSerializer,PosicionDocumentacionSerializer,PilotoSerializer,PilotoRedirectSerializer,DashboardSerializer
+from app.models import  Carreras, Campeonatos,Documentacion,Piloto,PilotoRedirect,Dashboard
 import django_filters.rest_framework
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
@@ -17,6 +17,7 @@ import re
 import coreapi
 from rest_framework.filters import BaseFilterBackend
 import operator
+from datetime import datetime
 
 def index(request):
     template = loader.get_template('app/index.html')
@@ -475,7 +476,7 @@ class PilotoViewSet(meviewsets.ModelViewSet):
 
             listaPuntosTemporada=list(puntosTemporada)
             for t in infoPiloto:
-                posicion=-1
+                posicion=0
                 #print("***Antes Del Bucle****")
                 #print(t.get("_id").get("temporada"))
                 #print("************************")
@@ -554,4 +555,282 @@ class PilotoRedirectViewSet(meviewsets.ModelViewSet):
             queryset.append(pil)
 
         return queryset
+    http_method_names = ['get']
+
+
+
+class DashboardViewSet(meviewsets.ModelViewSet):
+    """
+    list:
+    Dashboard Histórico y Última Temporada.
+    """
+
+    def get_kwargs_for_filtering(self):
+        filtering_kwargs=[]
+        return filtering_kwargs 
+    
+    serializer_class = DashboardSerializer
+    def get_queryset(self):
+        
+        dashboards=[]
+        filtering_kwargs = self.get_kwargs_for_filtering() # get the fields with values for filtering 
+        querysetCampeonato=Campeonatos._get_collection()
+        querysetCarrera=Carreras._get_collection()
+        topPuntosPilotos=[]
+        topPuntosPilotosCampeonato=[]
+        topCampeonatosDisputados=[]
+        topMotos=[]
+        topMotosTemporada=[]
+        dashboard= Dashboard()
+
+
+        recordPuntosPiloto=querysetCampeonato.aggregate([
+            {
+                "$project": {
+                    "piloto":"$piloto",
+                    "puntos":"$puntos"
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"piloto":"$piloto",},
+                    "puntos":{"$sum":"$puntos"},
+                }
+            },
+            {"$sort":{"puntos":-1,}},
+            {"$limit":5},
+        ])
+        recordPuntosCampeonato=querysetCampeonato.aggregate([
+
+
+
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "piloto":"$piloto",
+                "puntos":"$puntos"
+            }
+        },
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto","temporada":"$temporada"},
+                "puntos":{"$max":"$puntos"},
+            }
+        },
+        {"$sort":{"puntos":-1,}},
+        {"$limit":5},
+
+    ])
+
+        recordVictoriasPiloto=querysetCarrera.aggregate([
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "piloto":"$piloto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto",},
+                "victorias":{"$sum":"$victorias"},
+            }
+        },
+        {"$sort":{"victorias":-1,}},
+        {"$limit":5},
+
+    ])
+        recordVictoriasPilotoCampeonato=querysetCampeonato.aggregate([
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "piloto":"$piloto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto",},
+                "victorias":{"$sum":"$victorias"},
+            }
+        },
+        {"$sort":{"victorias":-1,}},
+        {"$limit":5},
+
+    ])
+
+        recordCampeonatosDisputados=querysetCampeonato.aggregate([
+
+
+
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "piloto":"$piloto",
+                "puntos":"$puntos"
+            }
+        },
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto"},
+                "temporadas":{"$sum":1},
+
+            }
+        },
+        {"$sort":{"temporadas":-1,}},
+        {"$limit":5},
+
+    ])
+        recordMotosVictoriosas=querysetCarrera.aggregate([
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "moto":"$moto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+        {
+            "$group": {
+                "_id": {"moto":"$moto",},
+                "victorias":{"$sum":"$victorias"},
+            }
+        },
+        {"$sort":{"victorias":-1,}},
+        {"$limit":5},
+
+    ])
+
+        topVictoriasPiloto=[]
+        topVictoriasPilotoCampeonato=[]
+        for r in recordPuntosPiloto:
+            topPuntosPilotos.append({r.get("_id").get("piloto"):r.get("puntos")})
+        for r in recordPuntosCampeonato:
+            topPuntosPilotosCampeonato.append({r.get("_id").get("piloto")+" - "+str(r.get("_id").get("temporada")):r.get("puntos")})
+        for r in recordCampeonatosDisputados:
+            topCampeonatosDisputados.append({r.get("_id").get("piloto"):r.get("temporadas")})
+        for r in recordMotosVictoriosas:
+            topMotos.append({r.get("_id").get("moto"):r.get("victorias")})
+        for r in recordVictoriasPiloto:
+            topVictoriasPiloto.append({r.get("_id").get("piloto"):r.get("victorias")})
+        for r in recordVictoriasPilotoCampeonato:
+            topVictoriasPilotoCampeonato.append({r.get("_id").get("piloto"):r.get("victorias")})
+
+        dashboard.datos_historicos.append({"top5_victorias_carreras":topVictoriasPiloto})
+        dashboard.datos_historicos.append({"top5_victorias_campeonatos":topVictoriasPilotoCampeonato})
+        dashboard.datos_historicos.append({"top5_puntos_global":topPuntosPilotos})
+        dashboard.datos_historicos.append({"top5_puntos_temporada":topPuntosPilotosCampeonato})
+        dashboard.datos_historicos.append({"top5_campeonatos_disputados":topCampeonatosDisputados})
+        dashboard.datos_historicos.append({"top5_victorias_marca":topMotos})
+
+        ultimaCarrera=querysetCarrera.aggregate([
+            {
+                "$project": {
+                    "fecha":"$fecha",
+                    "temporada":"$temporada",
+                    "titulo":"$titulo"
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"fecha":"$fecha","temporada":"$temporada","titulo":"$titulo"}
+                }
+            },
+            {"$sort":{"_id.fecha":-1}},
+            {"$limit":1}
+
+        ])
+        ultimaTemporada=None
+        for r in ultimaCarrera:
+            ultimaTemporada= r.get("_id").get("temporada")
+            dashboard.datos_ultima_temporada.append({"ultima_carrera": r.get("_id").get("fecha").strftime("%m/%d/%Y")+" - "+r.get("_id").get("titulo"),"url_ultima_carrera":"https://motogp-api.herokuapp.com/carrera/"+"?temporada="+str(ultimaTemporada)+"&titulo="+r.get("_id").get("titulo").replace(" ","%20")})
+        numCarreras=len(Carreras.objects.filter(temporada=ultimaTemporada).distinct('titulo'))
+        dashboard.datos_ultima_temporada.append({"num_carreras_disputadas":numCarreras})
+        
+
+        recordMotosVictoriosasTemporada=querysetCarrera.aggregate([
+        {"$match":{"temporada":ultimaTemporada}},
+
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "moto":"$moto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+        {
+            "$group": {
+                "_id": {"moto":"$moto",},
+                "victorias":{"$sum":"$victorias"},
+            }
+        },
+        {"$sort":{"victorias":-1,}},
+        {"$limit":3},
+
+    ])
+        recordVictoriasPilotoTemporada=querysetCarrera.aggregate([
+            {"$match":{"temporada":ultimaTemporada}},
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "piloto":"$piloto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto",},
+                "victorias":{"$sum":"$victorias"},
+            }
+        },
+        {"$sort":{"victorias":-1,}},
+        {"$limit":3},
+
+    ])
+        topPilotosTemporada=[]
+        for r in recordVictoriasPilotoTemporada:
+            topPilotosTemporada.append({r.get("_id").get("piloto"):r.get("victorias")})
+        dashboard.datos_ultima_temporada.append({"top3_victorias":topPilotosTemporada})
+        for r in recordMotosVictoriosasTemporada:
+            topMotosTemporada.append({r.get("_id").get("moto"):r.get("victorias")})
+        dashboard.datos_ultima_temporada.append({"top3_victorias_marca":topMotosTemporada})
+        nacionalidadPilotos=querysetCampeonato.aggregate([
+        
+        {"$match":{"temporada":ultimaTemporada}},
+
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "categoria":"$categoria",
+                "piloto":"$piloto",
+                "pais":"$pais",
+
+            }
+        },
+        {
+            "$group": {
+                "_id": {"temporada":"$temporada","pais":"$pais"},
+                "suma":{"$sum":1},
+
+            }
+        },
+        {"$sort":{"suma":-1,}},
+
+    ])
+
+        nacionalidadPilotosList=[]
+        for r in nacionalidadPilotos:
+            nacionalidadPilotosList.append( {r.get("_id").get("pais"):r.get("suma")})
+        dashboard.datos_ultima_temporada.append({"nacionalidad_pilotos": nacionalidadPilotosList})
+        dashboards=[dashboard]
+        return dashboards
     http_method_names = ['get']

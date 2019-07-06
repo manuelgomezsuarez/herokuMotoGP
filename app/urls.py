@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from rest_framework_mongoengine import routers as merouters
-from app.views import PosicionCarreraViewSet,PosicionCampeonatoViewSet,PosicionDocumentacionViewSet,index,PilotoViewSet,PilotoRedirectViewSet
+from app.views import PosicionCarreraViewSet,PosicionCampeonatoViewSet,PosicionDocumentacionViewSet,index,PilotoViewSet,PilotoRedirectViewSet,DashboardViewSet
 from django.urls import path
 
 merouter = merouters.DefaultRouter()
@@ -9,7 +9,7 @@ merouter.register(r'campeonato', PosicionCampeonatoViewSet,base_name="campeonato
 merouter.register(r'documentacion', PosicionDocumentacionViewSet,base_name="documentacion")
 merouter.register(r'piloto', PilotoRedirectViewSet,base_name="piloto")
 merouter.register(r'piloto/info', PilotoViewSet,base_name="pilotoInfo")
-
+merouter.register(r'dashboard', DashboardViewSet,base_name="dashboard")
 
 
 urlpatterns = [
