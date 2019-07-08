@@ -773,20 +773,34 @@ class DashboardViewSet(meviewsets.ModelViewSet):
         {
             "$project": {
                 "temporada":"$temporada",
+                "categoria":"$categoria",
                 "moto":"$moto",
                 "victorias":{  
                 "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
             },
             }
         },
+
         {
             "$group": {
-                "_id": {"moto":"$moto",},
-                "victorias":{"$sum":"$victorias"},
+                "_id": {"moto":"$moto","categoria":"$categoria"},
+               "victorias":{"$sum":"$victorias"},
+
             }
         },
-        {"$sort":{"victorias":-1,}},
-        {"$limit":3},
+        
+               {"$sort":{"victorias":-1}},
+        {
+            "$group": {
+                "_id": "$_id.categoria",
+                "categoGroup":{
+                    "$push":{
+                        "moto":"$_id.moto",
+                        "victorias":"$victorias"
+                        }
+                    },
+            }
+        },
 
     ])
         recordVictoriasPilotoTemporada=querysetCarrera.aggregate([
@@ -801,28 +815,41 @@ class DashboardViewSet(meviewsets.ModelViewSet):
             },
             }
         },
+
         {
             "$group": {
                 "_id": {"piloto":"$piloto","categoria":"$categoria"},
-                "victorias":{"$sum":"$victorias"},
+               "victorias":{"$sum":"$victorias"},
+
             }
         },
-        {"$sort":{"victorias":-1,}},
-        {"$limit":3},
+        
+               {"$sort":{"victorias":-1}},
+        {
+            "$group": {
+                "_id": "$_id.categoria",
+                "categoGroup":{
+                    "$push":{
+                        "piloto":"$_id.piloto",
+                        "victorias":"$victorias"
+                        }
+                    },
+            }
+        },
 
     ])
         topPilotosTemporada=[]
         for r in recordVictoriasPilotoTemporada:
-            topPilotosTemporada.append({r.get("_id").get("piloto")+" - "+r.get("_id").get("categoria"):r.get("victorias")})
+            topPilotosTemporada.append({r.get("_id"):r.get("categoGroup")[:3]})
         dashboard.datos_ultima_temporada.append({"top3_victorias":topPilotosTemporada})
         for r in recordMotosVictoriosasTemporada:
-            topMotosTemporada.append({r.get("_id").get("moto"):r.get("victorias")})
+            topMotosTemporada.append({r.get("_id"):r.get("categoGroup")[:3]})
         dashboard.datos_ultima_temporada.append({"top3_victorias_marca":topMotosTemporada})
         nacionalidadPilotos=querysetCampeonato.aggregate([
         
         {"$match":{"temporada":ultimaTemporada}},
 
-        {
+   {
             "$project": {
                 "temporada":"$temporada",
                 "categoria":"$categoria",
@@ -831,20 +858,33 @@ class DashboardViewSet(meviewsets.ModelViewSet):
 
             }
         },
-        {
+
+                {
             "$group": {
-                "_id": {"temporada":"$temporada","pais":"$pais"},
+                "_id": {"temporada":"$temporada","categoria":"$categoria","pais":"$pais"},
                 "suma":{"$sum":1},
 
             }
         },
-        {"$sort":{"suma":-1,}},
+               {"$sort":{"suma":-1,}},
+
+        {
+            "$group": {
+                "_id": "$_id.categoria",
+                "categoGroup":{
+                    "$push":{
+                        "pais":"$_id.pais",
+                        "total":"$suma"
+                        }
+                    },
+            }
+        },
 
     ])
 
         nacionalidadPilotosList=[]
         for r in nacionalidadPilotos:
-            nacionalidadPilotosList.append( {r.get("_id").get("pais"):r.get("suma")})
+            nacionalidadPilotosList.append( {r.get("_id"):r.get("categoGroup")})
         dashboard.datos_ultima_temporada.append({"nacionalidad_pilotos": nacionalidadPilotosList})
         dashboards=[dashboard]
         return dashboards

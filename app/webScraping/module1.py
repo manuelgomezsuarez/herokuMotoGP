@@ -201,7 +201,7 @@ def getRecordCampeonatosParticipados():
 def getNacionalidadPilotosUltimaTemporada():
     connectDB()
     recordPuntosCampeonato=collectionCampeonatos.aggregate([
-        
+        {"$match":{"temporada":2019}},
 
 
         {
@@ -213,14 +213,28 @@ def getNacionalidadPilotosUltimaTemporada():
 
             }
         },
-        {
+
+                {
             "$group": {
-                "_id": {"temporada":"$temporada","pais":"$pais"},
+                "_id": {"temporada":"$temporada","categoria":"$categoria","pais":"$pais"},
                 "suma":{"$sum":1},
 
             }
         },
-        {"$sort":{"suma":1,}},
+               {"$sort":{"suma":-1,}},
+
+        {
+            "$group": {
+                "_id": "$_id.categoria",
+                "PaisGroup":{
+                    "$push":{
+                        "pais":"$_id.pais",
+                        "suma":"$suma"
+                        }
+                    },
+            }
+        },
+ 
 
     ])
 
@@ -266,6 +280,9 @@ def getUltimaFechaCarreraScrap():
                 "temporada":"$temporada"
             }
         },
+
+
+
         {
             "$group": {
                 "_id": {"fecha":"$fecha","temporada":"$temporada","titulo":"$titulo"}
@@ -281,11 +298,57 @@ def getUltimaFechaCarreraScrap():
 
 
 
+def getVitoriasPiloto():
+    connectDB()
+    carrerasPorFechaOrder=collectionCarreras.aggregate([
+            {"$match":{"temporada":2019}},
+            
+        {
+            "$project": {
+                "temporada":"$temporada",
+                "categoria":"$categoria",
+                "piloto":"$piloto",
+                "victorias":{  
+                "$cond": [ { "$eq": ["$pos", 1 ] }, 1, 0]
+            },
+            }
+        },
+
+        {
+            "$group": {
+                "_id": {"piloto":"$piloto","categoria":"$categoria"},
+               "victorias":{"$sum":"$victorias"},
+
+            }
+        },
+        
+               {"$sort":{"victorias":-1}},
+        {
+            "$group": {
+                "_id": "$_id.categoria",
+                "categoGroup":{
+                    "$push":{
+                        "piloto":"$_id.piloto",
+                        "victorias":"$victorias"
+                        }
+                    },
+            }
+        },
+        
+
+      
+
+    ])
+    for n in carrerasPorFechaOrder:
+        print(n)
+
+
 #getResumenMotosAnual()
 #getResumenPilotosAnual()
 #getRecordPuntosPiloto()
 #getRecordPuntosPilotoCampeonato()
 #getRecordCampeonatosParticipados()
-getNacionalidadPilotosUltimaTemporada()
+#getNacionalidadPilotosUltimaTemporada()
+getVitoriasPiloto()
 #getMotoMasVictoriosaHistoria()
 #getUltimaFechaCarreraScrap()
