@@ -728,6 +728,8 @@ class PosicionCampeonatoViewSet(meviewsets.ModelViewSet):
                 # filter the queryset based on 'filtering_kwargs'
                 queryset = Campeonatos.objects.filter(**filtering_kwargs)
             return queryset
+    def filter_queryset(self, queryset):
+        return queryset
     http_method_names = ['get']
 
 
